@@ -1,3 +1,5 @@
+Fair notice. This file is purely me jotting down whatever came to my head at the time, and may have references that arent entirely clear to whoever may be reading this
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 if you trace the border of the shapeed farm land, if you make more lefts than you do right (it should be 3) then you must have the outer border of the section, this assumes you go right to start and go around counter clockwise.
 
 could potentially only calculate lines, for less storage space required, but more computational time

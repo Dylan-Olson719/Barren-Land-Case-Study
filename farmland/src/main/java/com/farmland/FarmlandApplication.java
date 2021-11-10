@@ -41,6 +41,12 @@ public class FarmlandApplication{
 		}while(ReturnTypes.RTN_ERROR == retCode);
 
 		instance.drawBarrenLandRectangles();
+
+		Iterator<BarrenLand> itr = instance.barrenLandList.iterator();
+		while(itr.hasNext()){
+			instance.traverseBarrenRectangle(itr.next());
+		}
+
 		//Start at first rectangle, check for farmable land around the rectangle
 		//after checking, see if we have at least one more rectangle, if so, repeat for that
 		//after all rectangles, print out results
@@ -54,6 +60,101 @@ public class FarmlandApplication{
 				Farmland[x][y] = LandMarker.Farmable;
 			}
 		}
+	}
+
+	/** Calculates the area of the farmable land that the coorinate supplied is apart of
+	 * @param x - x coodinate for the space to check the area of the farmable space that coordinate is a part of
+	 * @param y - y coodinate for the space to check the area of the farmable space that coordinate is a part of
+	 */
+	private void calculateFarmableLandArea(int x, int y){
+		//if we do exploding logic, we will only want to check spots that are directly up, down, left or right
+		//instead of a depth first, do a breadth first. pick a starting spot, then mark the farmable spaces around it as in progress, and add them to the queue
+		//after doing that to all the spots around it, add 1 to the current total size of the farmable space, mark the spot as finished, and get the next item in the queue, and repeat until finished
+
+	}
+
+	private void traverseBarrenRectangle(BarrenLand rec){
+		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
+		int x1 = rec.GetX1();
+		int x2 = rec.GetX2();
+		int y1 = rec.GetY1();
+		int y2 = rec.GetY2();
+
+		
+		//traverse the y1 wall
+		if(y1 > 0 && y1 <= 599){
+
+			if(Farmland[x1][y1-1] == LandMarker.Farmable){
+				calculateFarmableLandArea(x1, y1 - 1);
+			}
+
+			if(x1 > 0 && x1 <= 399){
+				if(Farmland[x1-1][y1-1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1 - 1, y1 - 1);
+				}
+				if(Farmland[x1-1][y1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1 - 1, y1);
+				}
+			}
+
+			for(int i = x1+1; i < x2; i++){
+				if(Farmland[i][y1-1] == LandMarker.Farmable){
+					calculateFarmableLandArea(i, y1 - 1);
+				}
+			}
+		}
+
+		//traverse the x2 wall
+		if(x2 >= 0 && x2 < 399){
+			if(Farmland[x2+1][y1] == LandMarker.Farmable){
+				calculateFarmableLandArea(x2 + 1, y1);
+			}
+
+			if(y1 > 0 && y1 <= 599){
+				if(Farmland[x2+1][y1-1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2 + 1, y1 - 1);
+				}
+				if(Farmland[x2][y1-1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2, y1 - 1);
+				}
+			}
+
+			for(int i = y1+1; i < y2; i++){
+				if(Farmland[x2+1][i] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2+1, i);
+				}
+			}
+		}
+
+		//traverse the y2 wall
+		if(y2 >= 0 && y2 < 599){
+
+			if(Farmland[x2][y2+1] == LandMarker.Farmable){
+				calculateFarmableLandArea(x2, y2 + 1);
+			}
+			
+			if(x1 >= 0 && x1 < 399){
+				if(Farmland[x2+1][y2+1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2 + 1, y2 + 1);
+				}
+				if(Farmland[x2+1][y2] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2 + 1, y2);
+				}
+			}
+
+			for(int i = x2-1; i > x1; i--){
+					if(Farmland[i][y2+1] == LandMarker.Farmable){
+					calculateFarmableLandArea(i, y2 + 1);
+				}
+			}
+		}
+
+		//traverse the x1 wall
+
+		for(int i = y2-1; i > y1; i--){
+
+		}
+
 	}
 
 	/** Sanitizes input
