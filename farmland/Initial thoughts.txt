@@ -1,0 +1,14 @@
+if you trace the border of the shapeed farm land, if you make more lefts than you do right (it should be 3) then you must have the outer border of the section, this assumes you go right to start and go around counter clockwise.
+
+could potentially only calculate lines, for less storage space required, but more computational time
+
+if we calculate based off all 4 corners of each barren square, i think we can be sure we had checked all potential spots (not true actually, need to check every section of every edge of every rectangle. maybe way to mark the edges of the rectangles? so we skip a check in the future if when "exploding" we already hit that space.
+
+multiple seperate barren zone, but still a single farmable area
+farmable area inside of a barren area, whith a barren area inside of that farmable area
+
+determine safe zones with similar logic to the "explosion" effect I made for Minesweeper in 12th grade
+
+check to the left right up and down of each square after finishing a zone, to see if it has been taken care of. if it has, great, if it hasnt, then do it. repeat until all have been taken care of (assuming 100 squares, this could mean doing 400 checks, since 4 sides per square
+
+cant do the explosive recursion like I did in 12th grade, since I will most likely hit the stack limit
