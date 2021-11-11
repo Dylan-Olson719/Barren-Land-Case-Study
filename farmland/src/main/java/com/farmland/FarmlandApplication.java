@@ -1,9 +1,12 @@
 package com.farmland;
 
 import java.io.Console;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.awt.Point;
 
 import com.barrenland.BarrenLand;
 import com.enums.*;
@@ -18,9 +21,14 @@ import com.input_sanitization.InputSanitization;
 public class FarmlandApplication{
 
 	//@Autowired
-	private InputSanitization rawInput = new InputSanitization();
-	private LandMarker[][] Farmland = new LandMarker[400][600];
+	final int xMax = 400;
+	final int yMax = 600;
+
+	//private InputSanitization rawInput = new InputSanitization();
+	private LandMarker[][] Farmland = new LandMarker[xMax][yMax];
+	private LinkedList<Point> coordQueue = new LinkedList<Point>();
 	private List<BarrenLand> barrenLandList = new LinkedList<BarrenLand>();
+	private LinkedList<Integer> FarmfieldAreas = new LinkedList<Integer>();
 	static Console console;
 
 	public static void main(String[] args) {
@@ -28,12 +36,13 @@ public class FarmlandApplication{
 		FarmlandApplication instance = new FarmlandApplication();
 		
 		console = System.console();
-		instance.initializeFarmland();
+		//We want to start off with assuming the entire 2d array is farmable, and apply the barren land later
+		Arrays.stream(instance.Farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
 		ReturnTypes retCode = ReturnTypes.RTN_ERROR;
 		String input;
 		do{
 			input = console.readLine("Please enter the set of rectangles for the barren land\n"
-			+ "Example input: {\"10 20 30 40\", \"110 120 130 140\"}");
+			+ "Example input: {\"10 20 30 40\", \"110 120 130 140\"} \n\n");
 			retCode = instance.sanitizeInput(input);
 			if (ReturnTypes.RTN_OK == retCode){
 				instance.grabRectangles(input);
@@ -44,36 +53,38 @@ public class FarmlandApplication{
 
 		Iterator<BarrenLand> itr = instance.barrenLandList.iterator();
 		while(itr.hasNext()){
-			instance.traverseBarrenRectangle(itr.next());
+			instance.traverseBarrenRectangleBorder(itr.next());
+			itr.remove();
 		}
+		
+		Collections.sort(instance.FarmfieldAreas);
 
-		//Start at first rectangle, check for farmable land around the rectangle
-		//after checking, see if we have at least one more rectangle, if so, repeat for that
-		//after all rectangles, print out results
-
-		System.out.println("fin");
+		instance.outputResults();
 	}
 
-	private void initializeFarmland(){
-		for(int x = 0; x <= 400; x++){
-			for(int y = 0; y <= 600; y++){
-				Farmland[x][y] = LandMarker.Farmable;
-			}
+	private void outputResults(){
+		console.printf("\n");
+		while(FarmfieldAreas.size() != 0){
+			console.printf(FarmfieldAreas.pop() + " ");//FarmfieldAreas.pop();
 		}
+
 	}
 
-	/** Calculates the area of the farmable land that the coorinate supplied is apart of
+	/** Calculates the area of the farmable land that the coorinate supplied is a part of
 	 * @param x - x coodinate for the space to check the area of the farmable space that coordinate is a part of
 	 * @param y - y coodinate for the space to check the area of the farmable space that coordinate is a part of
 	 */
 	private void calculateFarmableLandArea(int x, int y){
-		//if we do exploding logic, we will only want to check spots that are directly up, down, left or right
-		//instead of a depth first, do a breadth first. pick a starting spot, then mark the farmable spaces around it as in progress, and add them to the queue
-		//after doing that to all the spots around it, add 1 to the current total size of the farmable space, mark the spot as finished, and get the next item in the queue, and repeat until finished
-
+		//We only take action if the coordinate is farmable, if its not, we skip it
+		if(Farmland[x][y] == LandMarker.Farmable){
+			coordQueue.add(new Point(x, y));
+			Farmland[x][y] = LandMarker.InQueue;
+			int currentArea = SatisfyAllItemsInQueue();
+			FarmfieldAreas.add(currentArea);
+		}
 	}
 
-	private void traverseBarrenRectangle(BarrenLand rec){
+	private void traverseBarrenRectangleBorder(BarrenLand rec){
 		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
 		int x1 = rec.GetX1();
 		int x2 = rec.GetX2();
@@ -81,14 +92,14 @@ public class FarmlandApplication{
 		int y2 = rec.GetY2();
 
 		
-		//traverse the y1 wall
-		if(y1 > 0 && y1 <= 599){
+		//traverse the y1 wall and x1, y1 corner
+		if(y1 > 0 && y1 <= yMax - 1){
 
 			if(Farmland[x1][y1-1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x1, y1 - 1);
 			}
 
-			if(x1 > 0 && x1 <= 399){
+			if(x1 > 0 && x1 <= xMax - 1){
 				if(Farmland[x1-1][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x1 - 1, y1 - 1);
 				}
@@ -104,13 +115,13 @@ public class FarmlandApplication{
 			}
 		}
 
-		//traverse the x2 wall
-		if(x2 >= 0 && x2 < 399){
+		//traverse the x2 wall and x2, y1 corner
+		if(x2 >= 0 && x2 < xMax - 1){
 			if(Farmland[x2+1][y1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x2 + 1, y1);
 			}
 
-			if(y1 > 0 && y1 <= 599){
+			if(y1 > 0 && y1 <= yMax - 1){
 				if(Farmland[x2+1][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2 + 1, y1 - 1);
 				}
@@ -126,14 +137,14 @@ public class FarmlandApplication{
 			}
 		}
 
-		//traverse the y2 wall
-		if(y2 >= 0 && y2 < 599){
+		//traverse the y2 wall and x2, y2 corner
+		if(y2 >= 0 && y2 < yMax - 1){
 
 			if(Farmland[x2][y2+1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x2, y2 + 1);
 			}
 			
-			if(x1 >= 0 && x1 < 399){
+			if(x2 >= 0 && x2 < xMax - 1){
 				if(Farmland[x2+1][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2 + 1, y2 + 1);
 				}
@@ -143,20 +154,38 @@ public class FarmlandApplication{
 			}
 
 			for(int i = x2-1; i > x1; i--){
-					if(Farmland[i][y2+1] == LandMarker.Farmable){
+				if(Farmland[i][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(i, y2 + 1);
 				}
 			}
 		}
 
-		//traverse the x1 wall
+		//traverse the x1 wall and x1, y2 corner
+		if(x1 > 0 && x1 <= xMax - 1){
 
-		for(int i = y2-1; i > y1; i--){
+			if(Farmland[x1-1][y2] == LandMarker.Farmable){
+				calculateFarmableLandArea(x1-1, y2);
+			}
+			
+			if(y2 >= 0 && y2 < yMax - 1){
+				if(Farmland[x1-1][y2+1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1 - 1, y2 + 1);
+				}
+				if(Farmland[x1][y2+1] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1, y2 + 1);
+				}
+			}
 
+			for(int i = y2-1; i > y1; i--){
+				if(Farmland[x1-1][i] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1-1, i);
+				}
+			}
 		}
 
 	}
 
+	//#region Input Sanitization
 	/** Sanitizes input
 	 * example of proper input
 	 * {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”}
@@ -168,12 +197,12 @@ public class FarmlandApplication{
 		//  {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”} 
 		int curIndex;
 		String temp;
-		if ((!input.substring(0, 1).equals("}")) || (input.substring(input.length() - 1).equals("}"))){
+		if ((!input.substring(0, 1).equals("{")) || (!input.substring(input.length() - 1).equals("}"))){
 			console.printf("Your input is missing either a opening bracket at the start, or a closing bracket at the end.\n");
 			return ReturnTypes.RTN_ERROR;
 		}
 		
-		if((-1 != input.substring(1).indexOf("{")) || (input.length() - 1 != input.indexOf("}"))){
+		if(/*(-1 != input.substring(1).indexOf("{")) || */(input.length() - 1 != input.indexOf("}"))){
 			//we have an extra '{' or '}' in the string, therefore it is invalid
 			console.printf("There is an extra bracket in the input. Please remove it.\n");
 			return ReturnTypes.RTN_ERROR;
@@ -230,11 +259,11 @@ public class FarmlandApplication{
 		int curIndex = 0;
 		
 		for(int i = 1; i <=3; i++){
-			num = rectangle.substring(curIndex, rectangle.indexOf(" "));
+			num = rectangle.substring(curIndex, rectangle.indexOf(" ", curIndex));
 			if(ReturnTypes.RTN_OK != verifyInteger(num)){
 				return ReturnTypes.RTN_ERROR;
 			}
-			curIndex = rectangle.indexOf(" ") + 1;
+			curIndex = rectangle.indexOf(" ", curIndex) + 1;
 		}
 
 		if(ReturnTypes.RTN_OK != verifyInteger(rectangle.substring(curIndex))){
@@ -257,51 +286,59 @@ public class FarmlandApplication{
 		}
 		return ReturnTypes.RTN_OK;
 	}
-
+	//#endregion
+	
 	private ReturnTypes grabRectangles(String input){
 		int x1, y1, x2, y2;
-		int curIndex = 1;
+		int curIndex = 0;
+		int substrIndex;
 		int quote1Loc, quote2Loc;
 		String rectangle;
 
-		quote1Loc = input.indexOf("\"", curIndex);
-		quote2Loc = input.indexOf("\"", quote1Loc + 1);
+		while(curIndex != input.length()){
+			quote1Loc = input.indexOf("\"", curIndex);
+			quote2Loc = input.indexOf("\"", quote1Loc + 1);
+			
+			substrIndex = 0;
+
+			if(-1 == quote1Loc){
+				//we dont have any rectangles
+				return ReturnTypes.RTN_OK;
+			}
+	
+			rectangle = input.substring(quote1Loc + 1, quote2Loc);
+			curIndex = quote2Loc + 1;
+	
+			x1 = Integer.parseInt(rectangle.substring(substrIndex, rectangle.indexOf(" ", substrIndex)));
+			substrIndex = rectangle.indexOf(" ", substrIndex) + 1;
+			y1 = Integer.parseInt(rectangle.substring(substrIndex, rectangle.indexOf(" ", substrIndex)));
+			substrIndex = rectangle.indexOf(" ", substrIndex) + 1;
+			x2 = Integer.parseInt(rectangle.substring(substrIndex, rectangle.indexOf(" ", substrIndex)));
+			substrIndex = rectangle.indexOf(" ", substrIndex) + 1;
+			y2 = Integer.parseInt(rectangle.substring(substrIndex));
+	
+			//checking to make sure our coordinates are withing the bounds of our farmable area
+			if((400 <= x1) || (0 > x1) || (400 <= x2) || (0 > x2) ||
+				(600 <= y1) || (0 > y1) || (600 <= y2) || (0 > y2)){
+					console.printf("ERROR: Rectangle goes out of bounds. Please double check the input and try again\n");
+				return ReturnTypes.RTN_ERROR;
+			}
+	
+			if(x1 > x2){
+				int temp = x1;
+				x1 = x2;
+				x2 = temp;
+			}
+	
+			if(y1 > y2){
+				int temp = y1;
+				y1 = y2;
+				y2 = temp;
+			}
+	
+			barrenLandList.add(new BarrenLand(x1, y1, x2, y2));
+		}
 		
-		if(-1 == quote1Loc){
-			//we dont have any rectangles
-			return ReturnTypes.RTN_OK;
-		}
-
-		rectangle = input.substring(quote1Loc + 1, quote2Loc);
-
-		x1 = Integer.parseInt(input.substring(curIndex, rectangle.indexOf(" ")));
-		curIndex = rectangle.indexOf(" ") + 1;
-		y1 = Integer.parseInt(input.substring(curIndex, rectangle.indexOf(" ")));
-		curIndex = rectangle.indexOf(" ") + 1;
-		x2 = Integer.parseInt(input.substring(curIndex, rectangle.indexOf(" ")));
-		curIndex = rectangle.indexOf(" ") + 1;
-		y2 = Integer.parseInt(input.substring(curIndex));
-
-		//checking to make sure our coordinates are withing the bounds of our farmable area
-		if((400 <= x1) || (0 > x1) || (400 <= x2) || (0 > x2) || (x1 > x2) ||
-			(600 <= y1) || (0 > y1) || (600 <= y2) || (0 > y2) || (y1 > y2)){
-				console.printf("ERROR: Rectangle goes out of bounds or . Please double check the input and try again\n");
-			return ReturnTypes.RTN_ERROR;
-		}
-
-		if(x1 > x2){
-			int temp = x1;
-			x1 = x2;
-			x2 = temp;
-		}
-
-		if(y1 > y2){
-			int temp = y1;
-			y1 = y2;
-			y2 = temp;
-		}
-
-		barrenLandList.add(new BarrenLand(x1, y1, x2, y2));
 		return ReturnTypes.RTN_OK;
 	}
 
@@ -318,5 +355,53 @@ public class FarmlandApplication{
 				Farmland[x][y] = LandMarker.Barren;
 			}
 		}
+	}
+
+	/**
+	 * Looks at the coordinates directly above, below, and to the left and right.
+	 * If they are farmable land that has not yet been looked at, nor is in our queue already, it adds them to the queue of points to be checked and counted
+	 * @param x - X coordinate of the point we are looking at
+	 * @param y - Y coordinate of the point we are looking at
+	 */
+	private void enqueueSurroundingCoordinates(int x, int y){
+
+		if(x != 0){
+			if(LandMarker.Farmable == Farmland[x-1][y]){
+				coordQueue.add(new Point(x-1, y));
+				Farmland[x-1][y] = LandMarker.InQueue;
+			}
+		}
+		if(x != xMax - 1){
+			if(LandMarker.Farmable == Farmland[x+1][y]){
+				coordQueue.add(new Point(x+1, y));
+				Farmland[x+1][y] = LandMarker.InQueue;
+			}
+		}
+		if(y != 0){
+			if(LandMarker.Farmable == Farmland[x][y-1]){
+				coordQueue.add(new Point(x, y-1));
+				Farmland[x][y-1] = LandMarker.InQueue;
+			}
+		}
+		if(y != yMax - 1){
+			if(LandMarker.Farmable == Farmland[x][y+1]){
+				coordQueue.add(new Point(x, y+1));
+				Farmland[x][y+1] = LandMarker.InQueue;
+			}
+		}
+	}
+
+	private int SatisfyAllItemsInQueue(){
+		Point currentPoint;
+		int curArea = 0;
+		while(coordQueue.size() != 0){
+			currentPoint = coordQueue.peek();
+			enqueueSurroundingCoordinates(currentPoint.x, currentPoint.y);
+			curArea++;
+			coordQueue.pop();
+			Farmland[currentPoint.x][currentPoint.y] = LandMarker.Farmable_Marked;
+		}
+		
+		return curArea;
 	}
 }

@@ -10,7 +10,7 @@ package com.enums;
 public enum LandMarker{
 Farmable,
 Farmable_Marked, 
-InProgress,
+InQueue,
 Barren,
 Barren_Marked
 };
