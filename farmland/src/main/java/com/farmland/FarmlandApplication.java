@@ -24,10 +24,10 @@ public class FarmlandApplication{
 	final int yMax = 600;
 
 	//private InputSanitization rawInput = new InputSanitization();
-	private LandMarker[][] Farmland = new LandMarker[xMax][yMax];
-	private LinkedList<Point> coordQueue = new LinkedList<Point>();
+	public LandMarker[][] Farmland = new LandMarker[xMax][yMax];
+	public LinkedList<Point> coordQueue = new LinkedList<Point>();
 	private List<BarrenLand> barrenLandList = new LinkedList<BarrenLand>();
-	private LinkedList<Integer> FarmfieldAreas = new LinkedList<Integer>();
+	public LinkedList<Integer> FarmfieldAreas = new LinkedList<Integer>();
 	static Console console;
 
 	public static void main(String[] args) {
@@ -50,15 +50,24 @@ public class FarmlandApplication{
 
 		instance.drawBarrenLandRectangles();
 
-		Iterator<BarrenLand> itr = instance.barrenLandList.iterator();
-		while(itr.hasNext()){
-			instance.traverseBarrenRectangleBorder(itr.next());
-			itr.remove();
+		if(instance.barrenLandList.size() == 0){
+			//handle the case of no rectanlges being entered
+			instance.calculateFarmableLandArea(0,0);
+		}else{
+			Iterator<BarrenLand> itr = instance.barrenLandList.iterator();
+			while(itr.hasNext()){
+				instance.traverseBarrenRectangleBorder(itr.next());
+				itr.remove();
+			}
 		}
-		
-		Collections.sort(instance.FarmfieldAreas);
 
-		instance.outputResults();
+		if(instance.FarmfieldAreas.size() == 0){
+			console.printf("\n 0");
+		}else{
+			Collections.sort(instance.FarmfieldAreas);
+
+			instance.outputResults();
+		}
 	}
 
 	/**
@@ -76,7 +85,7 @@ public class FarmlandApplication{
 	 * @param x - x coodinate for the space to check the area of the farmable space that coordinate is a part of
 	 * @param y - y coodinate for the space to check the area of the farmable space that coordinate is a part of
 	 */
-	private void calculateFarmableLandArea(int x, int y){
+	public void calculateFarmableLandArea(int x, int y){
 		//We only take action if the coordinate is farmable, if its not, we skip it
 		if(Farmland[x][y] == LandMarker.Farmable){
 			coordQueue.add(new Point(x, y));
@@ -90,7 +99,7 @@ public class FarmlandApplication{
 	 * Traverse the border of a given rectangle, looking at the spaces next to the rectangle for farmable coordinates. If a farmable coordinate is found, determine the total size of the farmable space that the coordinate is a part of  
 	 * @param rec - Rectangle to traverse along the border of
 	 */
-	private void traverseBarrenRectangleBorder(BarrenLand rec){
+	public void traverseBarrenRectangleBorder(BarrenLand rec){
 		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
 		int x1 = rec.GetX1();
 		int x2 = rec.GetX2();
@@ -203,13 +212,23 @@ public class FarmlandApplication{
 		//  {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”} 
 		int curIndex;
 		if ((!input.substring(0, 1).equals("{")) || (!input.substring(input.length() - 1).equals("}"))){
-			console.printf("Your input is missing either a opening bracket at the start, or a closing bracket at the end.\n");
+			try{
+				console.printf("Your input is missing either a opening bracket at the start, or a closing bracket at the end.\n");
+			}catch(NullPointerException e){
+				//likely to hit a null ptr exception when testing, since there is no console to print to
+			}
+			
 			return ReturnTypes.RTN_ERROR;
 		}
 		
 		if(/*(-1 != input.substring(1).indexOf("{")) || */(input.length() - 1 != input.indexOf("}"))){
 			//we have an extra '{' or '}' in the string, therefore it is invalid
-			console.printf("There is an extra bracket in the input. Please remove it.\n");
+			try{
+				console.printf("There is an extra bracket in the input. Please remove it.\n");
+			}catch(NullPointerException e){
+				//likely to hit a null ptr exception when testing, since there is no console to print to
+			}
+
 			return ReturnTypes.RTN_ERROR;
 		}
 
@@ -222,7 +241,12 @@ public class FarmlandApplication{
 				if (input.substring(curIndex).equals("}")){
 					return ReturnTypes.RTN_OK;
 				}else{
-					console.printf("ERROR: Please double check the input and try again \n");
+					try{
+						console.printf("ERROR: Please double check the input and try again \n");
+					}catch(NullPointerException e){
+						//likely to hit a null ptr exception when testing, since there is no console to print to
+					}
+
 					return ReturnTypes.RTN_ERROR;
 				}
 				
@@ -231,7 +255,12 @@ public class FarmlandApplication{
 			quote2Loc = input.indexOf("\"", curIndex);
 			if(-1 == quote2Loc){
 				//we have an extra quote. Invalid input
-				console.printf("There is an extra \" in the input. Please remove it.\n");
+				try{
+					console.printf("There is an extra \" in the input. Please remove it.\n");
+				}catch(NullPointerException e){
+					//likely to hit a null ptr exception when testing, since there is no console to print to
+				}
+				
 				return ReturnTypes.RTN_ERROR;
 			}
 			//grab the text between the 2 quotes and verify it is a rectangle
@@ -264,7 +293,12 @@ public class FarmlandApplication{
 		int curIndex = 0;
 		
 		for(int i = 1; i <=3; i++){
-			num = rectangle.substring(curIndex, rectangle.indexOf(" ", curIndex));
+			try{
+				num = rectangle.substring(curIndex, rectangle.indexOf(" ", curIndex));
+			}catch(StringIndexOutOfBoundsException e){
+				return ReturnTypes.RTN_ERROR;
+			}
+
 			if(ReturnTypes.RTN_OK != verifyInteger(num)){
 				return ReturnTypes.RTN_ERROR;
 			}
@@ -286,7 +320,11 @@ public class FarmlandApplication{
 		try{
 			Integer.parseInt(num);
 		}catch(NumberFormatException e){
-			console.printf("ERROR: Rectangle input is not correct. Please double check the input and try again\n");
+			try{
+				console.printf("ERROR: Rectangle input is not correct. Please double check the input and try again\n");
+			}catch(NullPointerException exception){
+				//likely to hit a null ptr exception when testing, since there is no console to print to
+			}
 			return ReturnTypes.RTN_ERROR;
 		}
 		return ReturnTypes.RTN_OK;
@@ -298,7 +336,7 @@ public class FarmlandApplication{
 	 * @param input - raw input from user. This function assumes this has been sanitized
 	 * @return - RTN_ERROR if there was an issue, else RTN_OK
 	 */
-	private ReturnTypes grabRectangles(String input){
+	public ReturnTypes grabRectangles(String input){
 		int x1, y1, x2, y2;
 		int curIndex = 0;
 		int substrIndex;
@@ -330,7 +368,12 @@ public class FarmlandApplication{
 			//checking to make sure our coordinates are withing the bounds of our farmable area
 			if((xMax <= x1) || (0 > x1) || (xMax <= x2) || (0 > x2) ||
 				(yMax <= y1) || (0 > y1) || (yMax <= y2) || (0 > y2)){
+				try{
 					console.printf("ERROR: Rectangle goes out of bounds. Please double check the input and try again\n");
+				}catch(NullPointerException exception){
+					//likely to hit a null ptr exception when testing, since there is no console to print to
+				}
+					
 				return ReturnTypes.RTN_ERROR;
 			}
 	
@@ -366,7 +409,7 @@ public class FarmlandApplication{
 	 * Draws a single rectangle of barren land onto Farmland[][]
 	 * @param barren - rectangle to draw onto Farmland[][]
 	 */
-	private void drawBarrenLandRectangle(BarrenLand barren){
+	public void drawBarrenLandRectangle(BarrenLand barren){
 		for(int x = barren.GetX1(); x <= barren.GetX2(); x++){
 			for(int y = barren.GetY1(); y <= barren.GetY2(); y++){
 				Farmland[x][y] = LandMarker.Barren;
@@ -380,7 +423,7 @@ public class FarmlandApplication{
 	 * @param x - X coordinate of the point we are looking at
 	 * @param y - Y coordinate of the point we are looking at
 	 */
-	private void enqueueSurroundingCoordinates(int x, int y){
+	public void enqueueSurroundingCoordinates(int x, int y){
 
 		if(x != 0){
 			if(LandMarker.Farmable == Farmland[x-1][y]){
@@ -410,7 +453,7 @@ public class FarmlandApplication{
 
 	/**
 	 * finds the entire farmable area of each item in coordQueue. This function expects there to be coordinates from a single farmable area in coordQueue, not from 2 or more seperate area.
-	 * @return
+	 * @return - returns area total area of the farmable plot of the points in the Queue.
 	 */
 	private int findEntireFarmableArea(){
 		Point currentPoint;
