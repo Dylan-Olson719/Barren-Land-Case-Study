@@ -10,7 +10,6 @@ import java.awt.Point;
 
 import com.barrenland.BarrenLand;
 import com.enums.*;
-import com.input_sanitization.InputSanitization;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.SpringApplication;
 //import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -62,6 +61,9 @@ public class FarmlandApplication{
 		instance.outputResults();
 	}
 
+	/**
+	 * Output the area of the farmable areas to the console
+	 */
 	private void outputResults(){
 		console.printf("\n");
 		while(FarmfieldAreas.size() != 0){
@@ -79,11 +81,15 @@ public class FarmlandApplication{
 		if(Farmland[x][y] == LandMarker.Farmable){
 			coordQueue.add(new Point(x, y));
 			Farmland[x][y] = LandMarker.InQueue;
-			int currentArea = SatisfyAllItemsInQueue();
+			int currentArea = findEntireFarmableArea();
 			FarmfieldAreas.add(currentArea);
 		}
 	}
 
+	/**
+	 * Traverse the border of a given rectangle, looking at the spaces next to the rectangle for farmable coordinates. If a farmable coordinate is found, determine the total size of the farmable space that the coordinate is a part of  
+	 * @param rec - Rectangle to traverse along the border of
+	 */
 	private void traverseBarrenRectangleBorder(BarrenLand rec){
 		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
 		int x1 = rec.GetX1();
@@ -192,11 +198,10 @@ public class FarmlandApplication{
 	 * @param input - raw input
 	 * @return - returns whether or not the input is valid or not
 	 */
-	private ReturnTypes sanitizeInput(String input){
+	public ReturnTypes sanitizeInput(String input){
 		//example of proper input
 		//  {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”} 
 		int curIndex;
-		String temp;
 		if ((!input.substring(0, 1).equals("{")) || (!input.substring(input.length() - 1).equals("}"))){
 			console.printf("Your input is missing either a opening bracket at the start, or a closing bracket at the end.\n");
 			return ReturnTypes.RTN_ERROR;
@@ -288,6 +293,11 @@ public class FarmlandApplication{
 	}
 	//#endregion
 	
+	/**
+	 * parse through the input string and find all the rectangles in the string, then save each to barrenLandList
+	 * @param input - raw input from user. This function assumes this has been sanitized
+	 * @return - RTN_ERROR if there was an issue, else RTN_OK
+	 */
 	private ReturnTypes grabRectangles(String input){
 		int x1, y1, x2, y2;
 		int curIndex = 0;
@@ -318,8 +328,8 @@ public class FarmlandApplication{
 			y2 = Integer.parseInt(rectangle.substring(substrIndex));
 	
 			//checking to make sure our coordinates are withing the bounds of our farmable area
-			if((400 <= x1) || (0 > x1) || (400 <= x2) || (0 > x2) ||
-				(600 <= y1) || (0 > y1) || (600 <= y2) || (0 > y2)){
+			if((xMax <= x1) || (0 > x1) || (xMax <= x2) || (0 > x2) ||
+				(yMax <= y1) || (0 > y1) || (yMax <= y2) || (0 > y2)){
 					console.printf("ERROR: Rectangle goes out of bounds. Please double check the input and try again\n");
 				return ReturnTypes.RTN_ERROR;
 			}
@@ -342,6 +352,9 @@ public class FarmlandApplication{
 		return ReturnTypes.RTN_OK;
 	}
 
+	/**
+	 * Calls drawBarrenLandRectangle(BarrenLand) on each of the items in barrenLandList to mark the cooresponding spots as LandMarker.Barren
+	 */
 	private void drawBarrenLandRectangles(){
 		Iterator<BarrenLand> itr = barrenLandList.iterator();
 		while(itr.hasNext()){
@@ -349,6 +362,10 @@ public class FarmlandApplication{
 		}
 	}
 
+	/**
+	 * Draws a single rectangle of barren land onto Farmland[][]
+	 * @param barren - rectangle to draw onto Farmland[][]
+	 */
 	private void drawBarrenLandRectangle(BarrenLand barren){
 		for(int x = barren.GetX1(); x <= barren.GetX2(); x++){
 			for(int y = barren.GetY1(); y <= barren.GetY2(); y++){
@@ -391,7 +408,11 @@ public class FarmlandApplication{
 		}
 	}
 
-	private int SatisfyAllItemsInQueue(){
+	/**
+	 * finds the entire farmable area of each item in coordQueue. This function expects there to be coordinates from a single farmable area in coordQueue, not from 2 or more seperate area.
+	 * @return
+	 */
+	private int findEntireFarmableArea(){
 		Point currentPoint;
 		int curArea = 0;
 		while(coordQueue.size() != 0){

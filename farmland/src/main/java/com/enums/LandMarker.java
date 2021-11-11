@@ -11,6 +11,5 @@ public enum LandMarker{
 Farmable,
 Farmable_Marked, 
 InQueue,
-Barren,
-Barren_Marked
+Barren
 };
