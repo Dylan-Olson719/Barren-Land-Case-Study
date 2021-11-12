@@ -1,0 +1,18 @@
+
+Empty set - entire area is still farmable land
+{}
+
+Example 1 from case study - bisects the farmland into 2 equal sections of farmable land
+{"0 292 399 307"}
+
+Example 2 from case study - puts a pound sign (#) of barren land onto the area
+{"48 192 351 207", "48 392 351 407", "120 52 135 547\", "260 52 275 547"}
+
+All barren land
+{"0 0 399 599"}
+
+Checkerboard - divides the area into 24 100x100 sections, 12 of which are barren, while the other 12 are farmable
+{"0 0 99 99", "0 200 99 299", "0 400 99 499", "200 0 299 99", "200 200 299 299", "200 400 299 499", "100 100 199 199", "100 300 199 399", "100 500 199 599", "300 100 399 199", "300 300 399 399", "300 500 399 599"}
+
+Target, but with rectangles
+{"150 250 249 349", "50 150 99 399", "100 150 349 199", "50 400 299 449", "300 200 349 449"}

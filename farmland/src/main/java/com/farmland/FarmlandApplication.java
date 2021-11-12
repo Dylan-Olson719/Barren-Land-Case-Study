@@ -73,6 +73,17 @@ public class FarmlandApplication{
 
 	}
 
+	/**
+	 * takes in an error message and prints it to console
+	 * @param message - message to output to console
+	 */
+	private void outputError(String message){
+		try{
+			console.printf(message+ "\n");
+		}catch(NullPointerException e){
+			//likely to hit a null ptr exception when testing, since there is no console to print to
+		}
+	}
 	/** Calculates the area of the farmable land that the coorinate supplied is a part of
 	 * @param x - x coodinate for the space to check the area of the farmable space that coordinate is a part of
 	 * @param y - y coodinate for the space to check the area of the farmable space that coordinate is a part of
@@ -191,7 +202,8 @@ public class FarmlandApplication{
 	}
 
 	//#region Input Sanitization
-	/** Sanitizes input
+	/** 
+	 * Sanitizes input,
 	 * example of proper input
 	 * {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”}
 	 * @param input - raw input
@@ -199,23 +211,22 @@ public class FarmlandApplication{
 	 */
 	public ReturnTypes sanitizeInput(String input){
 		int curIndex;
+
+		if(input.length() == 0){
+			outputError("Your input is blank. Please try again.");
+			
+			return ReturnTypes.RTN_ERROR;
+		}
+
 		if ((!input.substring(0, 1).equals("{")) || (!input.substring(input.length() - 1).equals("}"))){
-			try{
-				console.printf("Your input is missing either a opening bracket at the start, or a closing bracket at the end.\n");
-			}catch(NullPointerException e){
-				//likely to hit a null ptr exception when testing, since there is no console to print to
-			}
+			outputError("Your input is missing either a opening bracket at the start, or a closing bracket at the end.");
 			
 			return ReturnTypes.RTN_ERROR;
 		}
 		
 		if((input.length() - 1 != input.indexOf("}"))){
 			//we have an extra '{' or '}' in the string, therefore it is invalid
-			try{
-				console.printf("There is an extra bracket in the input. Please remove it.\n");
-			}catch(NullPointerException e){
-				//likely to hit a null ptr exception when testing, since there is no console to print to
-			}
+			outputError("There is an extra bracket in the input. Please remove it.");
 
 			return ReturnTypes.RTN_ERROR;
 		}
@@ -230,11 +241,7 @@ public class FarmlandApplication{
 				if (input.substring(curIndex).equals("}")){
 					return ReturnTypes.RTN_OK;
 				}else{
-					try{
-						console.printf("ERROR: Please double check the input and try again \n");
-					}catch(NullPointerException e){
-						//likely to hit a null ptr exception when testing, since there is no console to print to
-					}
+					outputError("ERROR: Please double check the input and try again.");
 
 					return ReturnTypes.RTN_ERROR;
 				}
@@ -244,11 +251,7 @@ public class FarmlandApplication{
 			quote2Loc = input.indexOf("\"", curIndex);
 			if(-1 == quote2Loc){
 				//we have an extra quote. Invalid input
-				try{
-					console.printf("There is an extra \" in the input. Please remove it.\n");
-				}catch(NullPointerException e){
-					//likely to hit a null ptr exception when testing, since there is no console to print to
-				}
+				outputError("There is an extra \" in the input. Please remove it.");
 				
 				return ReturnTypes.RTN_ERROR;
 			}
@@ -274,7 +277,7 @@ public class FarmlandApplication{
 		for(int i = 1; i <=3; i++){
 			try{
 				num = rectangle.substring(curIndex, rectangle.indexOf(" ", curIndex));
-			}catch(StringIndexOutOfBoundsException e){
+			}catch(IndexOutOfBoundsException e){
 				return ReturnTypes.RTN_ERROR;
 			}
 
@@ -299,11 +302,8 @@ public class FarmlandApplication{
 		try{
 			Integer.parseInt(num);
 		}catch(NumberFormatException e){
-			try{
-				console.printf("ERROR: Rectangle input is not correct. Please double check the input and try again\n");
-			}catch(NullPointerException exception){
-				//likely to hit a null ptr exception when testing, since there is no console to print to
-			}
+			outputError("ERROR: Rectangle input is not correct. Please double check the input and try again");
+
 			return ReturnTypes.RTN_ERROR;
 		}
 		return ReturnTypes.RTN_OK;
