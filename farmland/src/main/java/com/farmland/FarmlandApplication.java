@@ -54,7 +54,7 @@ public class FarmlandApplication{
 		}
 
 		if(instance.farmfieldAreas.isEmpty()){
-			console.printf("\n 0");
+			console.printf("\n0");
 		}else{
 			Collections.sort(instance.farmfieldAreas);
 

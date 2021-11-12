@@ -1,5 +1,6 @@
 package com.example.farmland;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -134,16 +135,16 @@ class FarmlandApplicationTests {
 		Arrays.stream(obj3.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 
 		obj.calculateFarmableLandArea(0,0);
-		assertSame(240000, obj.farmfieldAreas.remove(0));
+		assertEquals(240000,  obj.farmfieldAreas.remove(0));
 
 		obj2.drawBarrenLandRectangle(defaultBarrenLand);
 		obj2.calculateFarmableLandArea(0,0);
 		obj2.calculateFarmableLandArea(399,599);
-		assertSame(116800, obj2.farmfieldAreas.remove(0));
-		assertSame(116800, obj2.farmfieldAreas.remove(0));
+		assertEquals(116800, obj2.farmfieldAreas.remove(0));
+		assertEquals(116800, obj2.farmfieldAreas.remove(0));
 
 		obj3.drawBarrenLandRectangle(allBarrenLand);
 		obj3.traverseBarrenRectangleBorder(allBarrenLand);
-		assertSame(0, obj2.farmfieldAreas.remove(0));
+		assertTrue(obj3.farmfieldAreas.isEmpty());
 	}
 }
