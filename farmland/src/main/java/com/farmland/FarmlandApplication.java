@@ -29,7 +29,7 @@ public class FarmlandApplication{
 		
 		console = System.console();
 		//We want to start off with assuming the entire 2d array is farmable, and apply the barren land later
-		Arrays.stream(instance.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
+		Arrays.stream(instance.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 		ReturnTypes retCode;
 		String input;
 		do{
@@ -80,9 +80,9 @@ public class FarmlandApplication{
 	 */
 	public void calculateFarmableLandArea(int x, int y){
 		//We only take action if the coordinate is farmable, if its not, we skip it
-		if(farmland[x][y] == LandMarker.Farmable){
+		if(farmland[x][y] == LandMarker.FARMABLE){
 			coordQueue.add(new Point(x, y));
-			farmland[x][y] = LandMarker.InQueue;
+			farmland[x][y] = LandMarker.IN_QUEUE;
 			int currentArea = findEntireFarmableArea();
 			farmfieldAreas.add(currentArea);
 		}
@@ -101,21 +101,21 @@ public class FarmlandApplication{
 		//traverse the y1 wall and x1, y1 corner
 		if(y1 > 0 && y1 <= Y_MAX - 1){
 
-			if(farmland[x1][y1-1] == LandMarker.Farmable){
+			if(farmland[x1][y1-1] == LandMarker.FARMABLE){
 				calculateFarmableLandArea(x1, y1 - 1);
 			}
 
 			if(x1 > 0 && x1 <= X_MAX - 1){
-				if(farmland[x1-1][y1-1] == LandMarker.Farmable){
+				if(farmland[x1-1][y1-1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x1 - 1, y1 - 1);
 				}
-				if(farmland[x1-1][y1] == LandMarker.Farmable){
+				if(farmland[x1-1][y1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x1 - 1, y1);
 				}
 			}
 
 			for(int i = x1+1; i < x2; i++){
-				if(farmland[i][y1-1] == LandMarker.Farmable){
+				if(farmland[i][y1-1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(i, y1 - 1);
 				}
 			}
@@ -123,21 +123,21 @@ public class FarmlandApplication{
 
 		//traverse the x2 wall and x2, y1 corner
 		if(x2 >= 0 && x2 < X_MAX - 1){
-			if(farmland[x2+1][y1] == LandMarker.Farmable){
+			if(farmland[x2+1][y1] == LandMarker.FARMABLE){
 				calculateFarmableLandArea(x2 + 1, y1);
 			}
 
 			if(y1 > 0 && y1 <= Y_MAX - 1){
-				if(farmland[x2+1][y1-1] == LandMarker.Farmable){
+				if(farmland[x2+1][y1-1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x2 + 1, y1 - 1);
 				}
-				if(farmland[x2][y1-1] == LandMarker.Farmable){
+				if(farmland[x2][y1-1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x2, y1 - 1);
 				}
 			}
 
 			for(int i = y1 + 1; i < y2; i++){
-				if(farmland[x2+1][i] == LandMarker.Farmable){
+				if(farmland[x2+1][i] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x2 + 1, i);
 				}
 			}
@@ -146,21 +146,21 @@ public class FarmlandApplication{
 		//traverse the y2 wall and x2, y2 corner
 		if(y2 >= 0 && y2 < Y_MAX - 1){
 
-			if(farmland[x2][y2+1] == LandMarker.Farmable){
+			if(farmland[x2][y2+1] == LandMarker.FARMABLE){
 				calculateFarmableLandArea(x2, y2 + 1);
 			}
 			
 			if(x2 >= 0 && x2 < X_MAX - 1){
-				if(farmland[x2+1][y2+1] == LandMarker.Farmable){
+				if(farmland[x2+1][y2+1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x2 + 1, y2 + 1);
 				}
-				if(farmland[x2+1][y2] == LandMarker.Farmable){
+				if(farmland[x2+1][y2] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x2 + 1, y2);
 				}
 			}
 
 			for(int i = x2-1; i > x1; i--){
-				if(farmland[i][y2+1] == LandMarker.Farmable){
+				if(farmland[i][y2+1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(i, y2 + 1);
 				}
 			}
@@ -169,21 +169,21 @@ public class FarmlandApplication{
 		//traverse the x1 wall and x1, y2 corner
 		if(x1 > 0 && x1 <= X_MAX - 1){
 
-			if(farmland[x1-1][y2] == LandMarker.Farmable){
+			if(farmland[x1-1][y2] == LandMarker.FARMABLE){
 				calculateFarmableLandArea(x1 - 1, y2);
 			}
 			
 			if(y2 >= 0 && y2 < Y_MAX - 1){
-				if(farmland[x1-1][y2+1] == LandMarker.Farmable){
+				if(farmland[x1-1][y2+1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x1 - 1, y2 + 1);
 				}
-				if(farmland[x1][y2+1] == LandMarker.Farmable){
+				if(farmland[x1][y2+1] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x1, y2 + 1);
 				}
 			}
 
 			for(int i = y2-1; i > y1; i--){
-				if(farmland[x1-1][i] == LandMarker.Farmable){
+				if(farmland[x1-1][i] == LandMarker.FARMABLE){
 					calculateFarmableLandArea(x1 - 1, i);
 				}
 			}
@@ -392,7 +392,7 @@ public class FarmlandApplication{
 	public void drawBarrenLandRectangle(BarrenLand barren){
 		for(int x = barren.getX1(); x <= barren.getX2(); x++){
 			for(int y = barren.getY1(); y <= barren.getY2(); y++){
-				farmland[x][y] = LandMarker.Barren;
+				farmland[x][y] = LandMarker.BARREN;
 			}
 		}
 	}
@@ -405,21 +405,21 @@ public class FarmlandApplication{
 	 */
 	public void enqueueSurroundingCoordinates(int x, int y){
 
-		if((x != 0) && (LandMarker.Farmable == farmland[x-1][y])){
+		if((x != 0) && (LandMarker.FARMABLE == farmland[x-1][y])){
 			coordQueue.add(new Point(x - 1, y));
-			farmland[x-1][y] = LandMarker.InQueue;
+			farmland[x-1][y] = LandMarker.IN_QUEUE;
 		}
-		if((x != X_MAX - 1) && (LandMarker.Farmable == farmland[x+1][y])){
+		if((x != X_MAX - 1) && (LandMarker.FARMABLE == farmland[x+1][y])){
 			coordQueue.add(new Point(x + 1, y));
-			farmland[x+1][y] = LandMarker.InQueue;
+			farmland[x+1][y] = LandMarker.IN_QUEUE;
 		}
-		if((y != 0) && (LandMarker.Farmable == farmland[x][y-1])){
+		if((y != 0) && (LandMarker.FARMABLE == farmland[x][y-1])){
 			coordQueue.add(new Point(x, y - 1));
-			farmland[x][y-1] = LandMarker.InQueue;
+			farmland[x][y-1] = LandMarker.IN_QUEUE;
 		}
-		if((y != Y_MAX - 1) && (LandMarker.Farmable == farmland[x][y+1])){
+		if((y != Y_MAX - 1) && (LandMarker.FARMABLE == farmland[x][y+1])){
 			coordQueue.add(new Point(x, y + 1));
-			farmland[x][y+1] = LandMarker.InQueue;
+			farmland[x][y+1] = LandMarker.IN_QUEUE;
 		}
 	}
 
@@ -435,7 +435,7 @@ public class FarmlandApplication{
 			enqueueSurroundingCoordinates(currentPoint.x, currentPoint.y);
 			curArea++;
 			coordQueue.poll();
-			farmland[currentPoint.x][currentPoint.y] = LandMarker.Farmable_Marked;
+			farmland[currentPoint.x][currentPoint.y] = LandMarker.FARMABLE_MARKED;
 		}
 		
 		return curArea;

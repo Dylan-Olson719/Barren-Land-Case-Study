@@ -49,52 +49,52 @@ class FarmlandApplicationTests {
 	@Test
 	public void testBarrenLandDrawing(){
 		obj = new FarmlandApplication();
-		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
+		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 
 		obj.drawBarrenLandRectangle(smallBarrenLand);
 		obj.drawBarrenLandRectangle(mediumBarrenLand);
 		obj.drawBarrenLandRectangle(largeBarrenLand);
-		assertSame(LandMarker.Barren, obj.farmland[1][1]);
-		assertSame(LandMarker.Barren, obj.farmland[10][10]);
-		assertSame(LandMarker.Barren, obj.farmland[10][20]);
-		assertSame(LandMarker.Barren, obj.farmland[20][20]);
-		assertSame(LandMarker.Barren, obj.farmland[20][10]);
-		assertSame(LandMarker.Barren, obj.farmland[100][100]);
-		assertSame(LandMarker.Barren, obj.farmland[100][200]);
-		assertSame(LandMarker.Barren, obj.farmland[200][200]);
-		assertSame(LandMarker.Barren, obj.farmland[200][100]);
+		assertSame(LandMarker.BARREN, obj.farmland[1][1]);
+		assertSame(LandMarker.BARREN, obj.farmland[10][10]);
+		assertSame(LandMarker.BARREN, obj.farmland[10][20]);
+		assertSame(LandMarker.BARREN, obj.farmland[20][20]);
+		assertSame(LandMarker.BARREN, obj.farmland[20][10]);
+		assertSame(LandMarker.BARREN, obj.farmland[100][100]);
+		assertSame(LandMarker.BARREN, obj.farmland[100][200]);
+		assertSame(LandMarker.BARREN, obj.farmland[200][200]);
+		assertSame(LandMarker.BARREN, obj.farmland[200][100]);
 	}
 
 	@Test
 	public void testQueueingOfCoordinates(){
 		obj = new FarmlandApplication();
-		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
+		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 
-		obj.farmland[10][10] = LandMarker.InQueue;
-		obj.farmland[9][10] = LandMarker.InQueue;//tests if we will get duplicates in the queue
+		obj.farmland[10][10] = LandMarker.IN_QUEUE;
+		obj.farmland[9][10] = LandMarker.IN_QUEUE;//tests if we will get duplicates in the queue
 
-		obj.farmland[20][20] = LandMarker.InQueue;
-		obj.farmland[20][19] = LandMarker.Barren; // tests if barren land gets into the queue
+		obj.farmland[20][20] = LandMarker.IN_QUEUE;
+		obj.farmland[20][19] = LandMarker.BARREN; // tests if barren land gets into the queue
 
-		obj.farmland[30][30] = LandMarker.InQueue;
-		obj.farmland[31][30] = LandMarker.Farmable_Marked; //tests if Farmable_Marked gets into the queue
+		obj.farmland[30][30] = LandMarker.IN_QUEUE;
+		obj.farmland[31][30] = LandMarker.FARMABLE_MARKED; //tests if Farmable_Marked gets into the queue
 
 		obj.enqueueSurroundingCoordinates(10,10);
 		obj.enqueueSurroundingCoordinates(20,20);
 		obj.enqueueSurroundingCoordinates(30,30);
 
-		assertSame(LandMarker.InQueue, obj.farmland[11][10]);
-		assertSame(LandMarker.InQueue, obj.farmland[10][9]);
-		assertSame(LandMarker.InQueue, obj.farmland[10][11]);
-		assertSame(LandMarker.InQueue, obj.farmland[19][20]);
-		assertSame(LandMarker.InQueue, obj.farmland[21][20]);
-		assertSame(LandMarker.InQueue, obj.farmland[20][21]);
-		assertSame(LandMarker.InQueue, obj.farmland[29][30]);
-		assertSame(LandMarker.InQueue, obj.farmland[30][29]);
-		assertSame(LandMarker.InQueue, obj.farmland[30][31]);
-		assertSame(LandMarker.InQueue, obj.farmland[9][10]);
-		assertSame(LandMarker.Barren, obj.farmland[20][19]);
-		assertSame(LandMarker.Farmable_Marked, obj.farmland[31][30]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[11][10]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[10][9]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[10][11]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[19][20]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[21][20]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[20][21]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[29][30]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[30][29]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[30][31]);
+		assertSame(LandMarker.IN_QUEUE, obj.farmland[9][10]);
+		assertSame(LandMarker.BARREN, obj.farmland[20][19]);
+		assertSame(LandMarker.FARMABLE_MARKED, obj.farmland[31][30]);
 
 		assertSame(9, obj.coordQueue.size());
 		//Check to make sure the LandMarker.InQueue item is not in the queue
@@ -129,9 +129,9 @@ class FarmlandApplicationTests {
 		obj2 = new FarmlandApplication();
 		obj3 = new FarmlandApplication();
 
-		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
-		Arrays.stream(obj2.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
-		Arrays.stream(obj3.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
+		Arrays.stream(obj.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
+		Arrays.stream(obj2.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
+		Arrays.stream(obj3.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 
 		obj.calculateFarmableLandArea(0,0);
 		assertSame(240000, obj.farmfieldAreas.remove(0));
