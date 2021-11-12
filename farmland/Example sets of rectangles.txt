@@ -6,7 +6,7 @@ Example 1 from case study - bisects the farmland into 2 equal sections of farmab
 {"0 292 399 307"}
 
 Example 2 from case study - puts a pound sign (#) of barren land onto the area
-{"48 192 351 207", "48 392 351 407", "120 52 135 547\", "260 52 275 547"}
+{"48 192 351 207", "48 392 351 407", "120 52 135 547", "260 52 275 547"}
 
 All barren land
 {"0 0 399 599"}
