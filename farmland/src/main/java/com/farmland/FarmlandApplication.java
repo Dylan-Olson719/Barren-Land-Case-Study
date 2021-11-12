@@ -6,38 +6,31 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.awt.Point;
 
 import com.barrenland.BarrenLand;
 import com.enums.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.SpringApplication;
-//import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-//import org.springframework.boot.web.reactive.context.ReactiveWebApplicationContext;
-
-//@SpringBootApplication
 public class FarmlandApplication{
 
 	//@Autowired
-	final int xMax = 400;
-	final int yMax = 600;
+	static final int X_MAX = 400;
+	static final int Y_MAX = 600;
 
-	//private InputSanitization rawInput = new InputSanitization();
-	public LandMarker[][] Farmland = new LandMarker[xMax][yMax];
-	public LinkedList<Point> coordQueue = new LinkedList<Point>();
-	private List<BarrenLand> barrenLandList = new LinkedList<BarrenLand>();
-	public LinkedList<Integer> FarmfieldAreas = new LinkedList<Integer>();
+	public LandMarker[][] farmland = new LandMarker[X_MAX][Y_MAX];
+	public Queue<Point> coordQueue = new LinkedList<>();
+	private List<BarrenLand> barrenLandList = new LinkedList<>();
+	public List<Integer> farmfieldAreas = new LinkedList<>();
 	static Console console;
 
 	public static void main(String[] args) {
-		//SpringApplication.run(FarmlandApplication.class, args);
 		FarmlandApplication instance = new FarmlandApplication();
 		
 		console = System.console();
 		//We want to start off with assuming the entire 2d array is farmable, and apply the barren land later
-		Arrays.stream(instance.Farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
-		ReturnTypes retCode = ReturnTypes.RTN_ERROR;
+		Arrays.stream(instance.farmland).forEach(a -> Arrays.fill(a,LandMarker.Farmable));
+		ReturnTypes retCode;
 		String input;
 		do{
 			input = console.readLine("Please enter the set of rectangles for the barren land\n"
@@ -50,7 +43,7 @@ public class FarmlandApplication{
 
 		instance.drawBarrenLandRectangles();
 
-		if(instance.barrenLandList.size() == 0){
+		if(instance.barrenLandList.isEmpty()){
 			//handle the case of no rectanlges being entered
 			instance.calculateFarmableLandArea(0,0);
 		}else{
@@ -61,10 +54,10 @@ public class FarmlandApplication{
 			}
 		}
 
-		if(instance.FarmfieldAreas.size() == 0){
+		if(instance.farmfieldAreas.isEmpty()){
 			console.printf("\n 0");
 		}else{
-			Collections.sort(instance.FarmfieldAreas);
+			Collections.sort(instance.farmfieldAreas);
 
 			instance.outputResults();
 		}
@@ -75,8 +68,8 @@ public class FarmlandApplication{
 	 */
 	private void outputResults(){
 		console.printf("\n");
-		while(FarmfieldAreas.size() != 0){
-			console.printf(FarmfieldAreas.pop() + " ");//FarmfieldAreas.pop();
+		while(!farmfieldAreas.isEmpty()){
+			console.printf(farmfieldAreas.remove(0) + " ");
 		}
 
 	}
@@ -87,11 +80,11 @@ public class FarmlandApplication{
 	 */
 	public void calculateFarmableLandArea(int x, int y){
 		//We only take action if the coordinate is farmable, if its not, we skip it
-		if(Farmland[x][y] == LandMarker.Farmable){
+		if(farmland[x][y] == LandMarker.Farmable){
 			coordQueue.add(new Point(x, y));
-			Farmland[x][y] = LandMarker.InQueue;
+			farmland[x][y] = LandMarker.InQueue;
 			int currentArea = findEntireFarmableArea();
-			FarmfieldAreas.add(currentArea);
+			farmfieldAreas.add(currentArea);
 		}
 	}
 
@@ -101,99 +94,98 @@ public class FarmlandApplication{
 	 */
 	public void traverseBarrenRectangleBorder(BarrenLand rec){
 		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
-		int x1 = rec.GetX1();
-		int x2 = rec.GetX2();
-		int y1 = rec.GetY1();
-		int y2 = rec.GetY2();
+		int x1 = rec.getX1();
+		int x2 = rec.getX2();
+		int y1 = rec.getY1();
+		int y2 = rec.getY2();
 
-		
 		//traverse the y1 wall and x1, y1 corner
-		if(y1 > 0 && y1 <= yMax - 1){
+		if(y1 > 0 && y1 <= Y_MAX - 1){
 
-			if(Farmland[x1][y1-1] == LandMarker.Farmable){
+			if(farmland[x1][y1-1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x1, y1 - 1);
 			}
 
-			if(x1 > 0 && x1 <= xMax - 1){
-				if(Farmland[x1-1][y1-1] == LandMarker.Farmable){
+			if(x1 > 0 && x1 <= X_MAX - 1){
+				if(farmland[x1-1][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x1 - 1, y1 - 1);
 				}
-				if(Farmland[x1-1][y1] == LandMarker.Farmable){
+				if(farmland[x1-1][y1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x1 - 1, y1);
 				}
 			}
 
 			for(int i = x1+1; i < x2; i++){
-				if(Farmland[i][y1-1] == LandMarker.Farmable){
+				if(farmland[i][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(i, y1 - 1);
 				}
 			}
 		}
 
 		//traverse the x2 wall and x2, y1 corner
-		if(x2 >= 0 && x2 < xMax - 1){
-			if(Farmland[x2+1][y1] == LandMarker.Farmable){
+		if(x2 >= 0 && x2 < X_MAX - 1){
+			if(farmland[x2+1][y1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x2 + 1, y1);
 			}
 
-			if(y1 > 0 && y1 <= yMax - 1){
-				if(Farmland[x2+1][y1-1] == LandMarker.Farmable){
+			if(y1 > 0 && y1 <= Y_MAX - 1){
+				if(farmland[x2+1][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2 + 1, y1 - 1);
 				}
-				if(Farmland[x2][y1-1] == LandMarker.Farmable){
+				if(farmland[x2][y1-1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2, y1 - 1);
 				}
 			}
 
-			for(int i = y1+1; i < y2; i++){
-				if(Farmland[x2+1][i] == LandMarker.Farmable){
-					calculateFarmableLandArea(x2+1, i);
+			for(int i = y1 + 1; i < y2; i++){
+				if(farmland[x2+1][i] == LandMarker.Farmable){
+					calculateFarmableLandArea(x2 + 1, i);
 				}
 			}
 		}
 
 		//traverse the y2 wall and x2, y2 corner
-		if(y2 >= 0 && y2 < yMax - 1){
+		if(y2 >= 0 && y2 < Y_MAX - 1){
 
-			if(Farmland[x2][y2+1] == LandMarker.Farmable){
+			if(farmland[x2][y2+1] == LandMarker.Farmable){
 				calculateFarmableLandArea(x2, y2 + 1);
 			}
 			
-			if(x2 >= 0 && x2 < xMax - 1){
-				if(Farmland[x2+1][y2+1] == LandMarker.Farmable){
+			if(x2 >= 0 && x2 < X_MAX - 1){
+				if(farmland[x2+1][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2 + 1, y2 + 1);
 				}
-				if(Farmland[x2+1][y2] == LandMarker.Farmable){
+				if(farmland[x2+1][y2] == LandMarker.Farmable){
 					calculateFarmableLandArea(x2 + 1, y2);
 				}
 			}
 
 			for(int i = x2-1; i > x1; i--){
-				if(Farmland[i][y2+1] == LandMarker.Farmable){
+				if(farmland[i][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(i, y2 + 1);
 				}
 			}
 		}
 
 		//traverse the x1 wall and x1, y2 corner
-		if(x1 > 0 && x1 <= xMax - 1){
+		if(x1 > 0 && x1 <= X_MAX - 1){
 
-			if(Farmland[x1-1][y2] == LandMarker.Farmable){
-				calculateFarmableLandArea(x1-1, y2);
+			if(farmland[x1-1][y2] == LandMarker.Farmable){
+				calculateFarmableLandArea(x1 - 1, y2);
 			}
 			
-			if(y2 >= 0 && y2 < yMax - 1){
-				if(Farmland[x1-1][y2+1] == LandMarker.Farmable){
+			if(y2 >= 0 && y2 < Y_MAX - 1){
+				if(farmland[x1-1][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x1 - 1, y2 + 1);
 				}
-				if(Farmland[x1][y2+1] == LandMarker.Farmable){
+				if(farmland[x1][y2+1] == LandMarker.Farmable){
 					calculateFarmableLandArea(x1, y2 + 1);
 				}
 			}
 
 			for(int i = y2-1; i > y1; i--){
-				if(Farmland[x1-1][i] == LandMarker.Farmable){
-					calculateFarmableLandArea(x1-1, i);
+				if(farmland[x1-1][i] == LandMarker.Farmable){
+					calculateFarmableLandArea(x1 - 1, i);
 				}
 			}
 		}
@@ -366,8 +358,8 @@ public class FarmlandApplication{
 			y2 = Integer.parseInt(rectangle.substring(substrIndex));
 	
 			//checking to make sure our coordinates are withing the bounds of our farmable area
-			if((xMax <= x1) || (0 > x1) || (xMax <= x2) || (0 > x2) ||
-				(yMax <= y1) || (0 > y1) || (yMax <= y2) || (0 > y2)){
+			if((X_MAX <= x1) || (0 > x1) || (X_MAX <= x2) || (0 > x2) ||
+				(Y_MAX <= y1) || (0 > y1) || (Y_MAX <= y2) || (0 > y2)){
 				try{
 					console.printf("ERROR: Rectangle goes out of bounds. Please double check the input and try again\n");
 				}catch(NullPointerException exception){
@@ -410,9 +402,9 @@ public class FarmlandApplication{
 	 * @param barren - rectangle to draw onto Farmland[][]
 	 */
 	public void drawBarrenLandRectangle(BarrenLand barren){
-		for(int x = barren.GetX1(); x <= barren.GetX2(); x++){
-			for(int y = barren.GetY1(); y <= barren.GetY2(); y++){
-				Farmland[x][y] = LandMarker.Barren;
+		for(int x = barren.getX1(); x <= barren.getX2(); x++){
+			for(int y = barren.getY1(); y <= barren.getY2(); y++){
+				farmland[x][y] = LandMarker.Barren;
 			}
 		}
 	}
@@ -425,29 +417,21 @@ public class FarmlandApplication{
 	 */
 	public void enqueueSurroundingCoordinates(int x, int y){
 
-		if(x != 0){
-			if(LandMarker.Farmable == Farmland[x-1][y]){
-				coordQueue.add(new Point(x-1, y));
-				Farmland[x-1][y] = LandMarker.InQueue;
-			}
+		if((x != 0) && (LandMarker.Farmable == farmland[x-1][y])){
+			coordQueue.add(new Point(x - 1, y));
+			farmland[x-1][y] = LandMarker.InQueue;
 		}
-		if(x != xMax - 1){
-			if(LandMarker.Farmable == Farmland[x+1][y]){
-				coordQueue.add(new Point(x+1, y));
-				Farmland[x+1][y] = LandMarker.InQueue;
-			}
+		if((x != X_MAX - 1) && (LandMarker.Farmable == farmland[x+1][y])){
+			coordQueue.add(new Point(x + 1, y));
+			farmland[x+1][y] = LandMarker.InQueue;
 		}
-		if(y != 0){
-			if(LandMarker.Farmable == Farmland[x][y-1]){
-				coordQueue.add(new Point(x, y-1));
-				Farmland[x][y-1] = LandMarker.InQueue;
-			}
+		if((y != 0) && (LandMarker.Farmable == farmland[x][y-1])){
+			coordQueue.add(new Point(x, y - 1));
+			farmland[x][y-1] = LandMarker.InQueue;
 		}
-		if(y != yMax - 1){
-			if(LandMarker.Farmable == Farmland[x][y+1]){
-				coordQueue.add(new Point(x, y+1));
-				Farmland[x][y+1] = LandMarker.InQueue;
-			}
+		if((y != Y_MAX - 1) && (LandMarker.Farmable == farmland[x][y+1])){
+			coordQueue.add(new Point(x, y + 1));
+			farmland[x][y+1] = LandMarker.InQueue;
 		}
 	}
 
@@ -458,12 +442,12 @@ public class FarmlandApplication{
 	private int findEntireFarmableArea(){
 		Point currentPoint;
 		int curArea = 0;
-		while(coordQueue.size() != 0){
+		while(!coordQueue.isEmpty()){
 			currentPoint = coordQueue.peek();
 			enqueueSurroundingCoordinates(currentPoint.x, currentPoint.y);
 			curArea++;
-			coordQueue.pop();
-			Farmland[currentPoint.x][currentPoint.y] = LandMarker.Farmable_Marked;
+			coordQueue.poll();
+			farmland[currentPoint.x][currentPoint.y] = LandMarker.Farmable_Marked;
 		}
 		
 		return curArea;

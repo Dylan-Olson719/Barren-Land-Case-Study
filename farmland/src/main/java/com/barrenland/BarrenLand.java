@@ -12,19 +12,19 @@ public class BarrenLand {
         yCoord2 = y2;
     }
 
-    public int GetX1(){
+    public int getX1(){
         return xCoord1;
     }
 
-    public int GetY1(){
+    public int getY1(){
         return yCoord1;
     }
 
-    public int GetX2(){
+    public int getX2(){
         return xCoord2;
     }
 
-    public int GetY2(){
+    public int getY2(){
         return yCoord2;
     }
 }
