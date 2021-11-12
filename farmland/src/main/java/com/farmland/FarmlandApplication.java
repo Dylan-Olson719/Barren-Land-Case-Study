@@ -28,7 +28,6 @@ public class FarmlandApplication{
 		FarmlandApplication instance = new FarmlandApplication();
 		
 		console = System.console();
-		//We want to start off with assuming the entire 2d array is farmable, and apply the barren land later
 		Arrays.stream(instance.farmland).forEach(a -> Arrays.fill(a,LandMarker.FARMABLE));
 		ReturnTypes retCode;
 		String input;
@@ -347,7 +346,7 @@ public class FarmlandApplication{
 	
 			//checking to make sure our coordinates are withing the bounds of our farmable area
 			if((X_MAX <= x1) || (0 > x1) || (X_MAX <= x2) || (0 > x2) ||
-				(Y_MAX <= y1) || (0 > y1) || (Y_MAX <= y2) || (0 > y2)){
+			   (Y_MAX <= y1) || (0 > y1) || (Y_MAX <= y2) || (0 > y2)){
 				try{
 					console.printf("ERROR: Rectangle goes out of bounds. Please double check the input and try again\n");
 				}catch(NullPointerException exception){
