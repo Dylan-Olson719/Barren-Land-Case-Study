@@ -93,7 +93,6 @@ public class FarmlandApplication{
 	 * @param rec - Rectangle to traverse along the border of
 	 */
 	public void traverseBarrenRectangleBorder(BarrenLand rec){
-		//go along the border of a rectangle and check to see if the spot just outside of the rectangle is farmable. if it is, and has not been taken care of yet, run calculateFarmableLandArea() on it, otherwise, keep moving. Once you have checked all spots around the 1 space, mark it as checked and move on. If you hit a spot that has already been marked checked, just keep going, since it was likely an intersection between multiple rectangles
 		int x1 = rec.getX1();
 		int x2 = rec.getX2();
 		int y1 = rec.getY1();
@@ -200,8 +199,6 @@ public class FarmlandApplication{
 	 * @return - returns whether or not the input is valid or not
 	 */
 	public ReturnTypes sanitizeInput(String input){
-		//example of proper input
-		//  {“48 192 351 207”, “48 392 351 407”, “120 52 135 547”, “260 52 275 547”} 
 		int curIndex;
 		if ((!input.substring(0, 1).equals("{")) || (!input.substring(input.length() - 1).equals("}"))){
 			try{
@@ -213,7 +210,7 @@ public class FarmlandApplication{
 			return ReturnTypes.RTN_ERROR;
 		}
 		
-		if(/*(-1 != input.substring(1).indexOf("{")) || */(input.length() - 1 != input.indexOf("}"))){
+		if((input.length() - 1 != input.indexOf("}"))){
 			//we have an extra '{' or '}' in the string, therefore it is invalid
 			try{
 				console.printf("There is an extra bracket in the input. Please remove it.\n");
@@ -225,6 +222,7 @@ public class FarmlandApplication{
 		}
 
 		curIndex = 1; //start at index 1 since we know index 0 is a '{'
+
 		//Loop through, verifying that we have retangles clearly marked out, and that we have no unexpected items in the input
 		while(input.length() - 1 != curIndex){
 			int quote1Loc, quote2Loc;
@@ -261,16 +259,6 @@ public class FarmlandApplication{
 			}
 			curIndex = quote2Loc + 1;
 		}
-		//check for input with zero rectangles. Only need to check the length, since we know we start with a '{' and end with a '}'
-
-		//grab the last characters of the string
-
-			// do we start and end in a bracket
-	   // find the start and end of a rectangle
-	   //       verify we find the second quote before a comma
-	   //once found, verify 4 integers inside of there
-	   //move onto next
-	   //repeat until we hit the end
 	   
 		return ReturnTypes.RTN_OK;
 	}
@@ -342,7 +330,7 @@ public class FarmlandApplication{
 			substrIndex = 0;
 
 			if(-1 == quote1Loc){
-				//we dont have any rectangles
+				//we dont have any more rectangles
 				return ReturnTypes.RTN_OK;
 			}
 	
