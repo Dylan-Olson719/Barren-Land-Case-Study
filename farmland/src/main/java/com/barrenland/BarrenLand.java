@@ -1,6 +1,6 @@
 package com.barrenland;
 
-//@
+
 public class BarrenLand {
 
     private int xCoord1, xCoord2, yCoord1, yCoord2;

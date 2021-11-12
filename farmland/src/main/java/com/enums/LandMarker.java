@@ -8,8 +8,8 @@ package com.enums;
  * Barren_Marked - denotes barren land that has been checked for farmable land around it. This should only ever be applied to barren land on the border of the original rectangles read in as input
  */
 public enum LandMarker{
-Farmable,
-Farmable_Marked, 
-InQueue,
-Barren
-};
+FARMABLE,
+FARMABLE_MARKED, 
+IN_QUEUE,
+BARREN
+}
